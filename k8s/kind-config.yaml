@@ -1,0 +1,12 @@
+# Clúster kind que publica los NodePort en localhost, para abrir la API y la interfaz desde el navegador en
+# Linux, macOS, Windows (Docker Desktop) y WSL2 sin depender de la IP interna del nodo.
+#   kind create cluster --config k8s/kind-config.yaml
+# Después: API http://127.0.0.1:30090/docs · Interfaz http://127.0.0.1:30091
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+name: mlops
+nodes:
+  - role: control-plane
+    extraPortMappings:
+      - { containerPort: 30090, hostPort: 30090, listenAddress: "127.0.0.1", protocol: TCP }   # Service riesgo-api
+      - { containerPort: 30091, hostPort: 30091, listenAddress: "127.0.0.1", protocol: TCP }   # Service riesgo-ui

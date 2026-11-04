@@ -6,9 +6,12 @@ del registro la produjo, y en qué Pod de Kubernetes se atendió (variable POD_N
 """
 import os
 import socket
+import threading
+from contextlib import asynccontextmanager
 from typing import Literal
 
 import mlflow
+import mlflow.pyfunc  # explícito: sin esto mlflow.pyfunc es un módulo perezoso
 import numpy as np
 import pandas as pd
 from fastapi import FastAPI, HTTPException
@@ -19,28 +22,47 @@ NOMBRE = os.getenv("MODELO_NOMBRE", "riesgo-credito")
 ALIAS = os.getenv("MODELO_ALIAS", "champion")
 POD = os.getenv("POD_NAME", socket.gethostname())
 UMBRAL = float(os.getenv("UMBRAL_RIESGO", "0.5"))
+REINTENTO_S = float(os.getenv("CARGA_REINTENTO_S", "5"))  # espera entre intentos de carga si MLflow no responde
 
 estado = {"modelo": None, "version": None, "run_id": None, "error": None}
 
 
-def cargar_modelo():
+def cargar_modelo() -> bool:
+    """Un intento de carga desde el registro. Devuelve True si el modelo quedó listo."""
     try:
         version = MlflowClient().get_model_version_by_alias(NOMBRE, ALIAS)
-        estado["modelo"] = mlflow.pyfunc.load_model(f"models:/{NOMBRE}@{ALIAS}")
-        estado.update(version=version.version, run_id=version.run_id, error=None)
+        modelo = mlflow.pyfunc.load_model(f"models:/{NOMBRE}@{ALIAS}")
+        if modelo is None:  # con un registro mal configurado MLflow 3.14 devuelve None en vez de lanzar un error
+            raise RuntimeError(f"MLflow no devolvió el modelo models:/{NOMBRE}@{ALIAS} (revisa MLFLOW_TRACKING_URI)")
+        # el modelo se publica al final: /ready nunca ve un estado a medias (versión sin modelo o al revés)
+        estado.update(version=version.version, run_id=version.run_id, error=None, modelo=modelo)
         print(f"[{POD}] modelo {NOMBRE}@{ALIAS} -> versión {version.version} (run {version.run_id})", flush=True)
+        return True
     except Exception as e:  # el Pod queda vivo pero NO listo: la readinessProbe le impide recibir tráfico
         estado["error"] = str(e)
         print(f"[{POD}] no se pudo cargar el modelo: {e}", flush=True)
+        return False
 
 
-app = FastAPI(title="API de riesgo crediticio", version="2.0.0",
+def cargar_con_reintentos(detener: threading.Event):
+    """Reintenta en segundo plano hasta cargar el modelo: si MLflow tarda o cae, el Pod no se reinicia
+    (la livenessProbe solo mira /health) y se recupera solo cuando MLflow vuelve."""
+    while not detener.is_set():
+        if cargar_modelo():
+            return
+        detener.wait(REINTENTO_S)
+
+
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    detener = threading.Event()
+    threading.Thread(target=cargar_con_reintentos, args=(detener,), daemon=True, name="carga-modelo").start()
+    yield
+    detener.set()
+
+
+app = FastAPI(title="API de riesgo crediticio", version="2.1.0", lifespan=lifespan,
               description="Predice la probabilidad de que un cliente incumpla su próximo pago.")
-
-
-@app.on_event("startup")
-def al_iniciar():
-    cargar_modelo()
 
 
 Estado = Literal[-2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9]

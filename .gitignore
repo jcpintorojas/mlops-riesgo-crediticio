@@ -9,3 +9,6 @@ __pycache__/
 .venv/
 # Salidas generadas por las pruebas de drift (se regeneran)
 drift/salidas/
+# Pruebas
+.pytest_cache/
+mlflow.db

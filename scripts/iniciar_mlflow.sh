@@ -6,9 +6,12 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 mkdir -p mlflow-data
 if docker ps -a --format '{{.Names}}' | grep -qx mlflow; then
+  docker update --restart unless-stopped mlflow >/dev/null   # contenedores creados antes de esta política
   docker start mlflow >/dev/null
 else
-  docker run -d --name mlflow --network kind -p 5000:5000 \
+  # --restart unless-stopped: MLflow vuelve solo tras reiniciar Docker o la PC (salvo que lo detengas a mano)
+  # -p 127.0.0.1:5000:5000: la interfaz (sin autenticación) solo es visible desde esta máquina; los Pods usan la red "kind"
+  docker run -d --name mlflow --restart unless-stopped --network kind -p 127.0.0.1:5000:5000 \
     -u "$(id -u):$(id -g)" -v "$PWD/mlflow-data:/mlflow" \
     riesgo-mlflow:3.14.0 \
     mlflow server --host 0.0.0.0 --port 5000 \

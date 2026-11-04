@@ -9,5 +9,7 @@ COPY app.py .
 RUN useradd --create-home --uid 10001 appuser
 USER appuser
 ENV MLFLOW_TRACKING_URI=http://mlflow:5000 MODELO_NOMBRE=riesgo-credito MODELO_ALIAS=champion
+# Reintentos cortos del cliente de MLflow: el bucle de app.py (CARGA_REINTENTO_S) decide cada cuánto reintentar la carga
+ENV MLFLOW_HTTP_REQUEST_MAX_RETRIES=1 MLFLOW_HTTP_REQUEST_BACKOFF_FACTOR=1 MLFLOW_HTTP_REQUEST_TIMEOUT=10 CARGA_REINTENTO_S=5
 EXPOSE 8000
 CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
