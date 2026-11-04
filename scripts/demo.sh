@@ -18,9 +18,9 @@ kubectl get pods -o wide
 NODO=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' mlops-control-plane)
 echo
 echo "Listo:"
-echo "  MLflow (experimentos y Model Registry): http://localhost:5000"
+echo "  MLflow (experimentos y Model Registry): http://127.0.0.1:5000"
 echo "  Interfaz web (consume la API en K8s):   http://$NODO:30091"
 echo "  API (Swagger):                         http://$NODO:30090/docs"
 echo "  Prueba rápida de balanceo:"
 echo "    for i in \$(seq 1 10); do curl -s -X POST http://$NODO:30090/predict -H 'Content-Type: application/json' -d @scripts/cliente_alto.json; echo; done"
-command -v xdg-open >/dev/null && { xdg-open http://localhost:5000 >/dev/null 2>&1; xdg-open "http://$NODO:30091" >/dev/null 2>&1; } || true
+command -v xdg-open >/dev/null && { xdg-open http://127.0.0.1:5000 >/dev/null 2>&1; xdg-open "http://$NODO:30091" >/dev/null 2>&1; } || true

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Levanta el servidor de MLflow (tracking + Model Registry + artifact store) en un contenedor.
 # Se conecta a la red Docker "kind" para que los Pods del clúster lo encuentren como http://mlflow:5000.
-# Interfaz web: http://localhost:5000
+# Interfaz web: http://127.0.0.1:5000  (usar 127.0.0.1: "localhost" resuelve a IPv6 y la red de kind no lo publica)
 set -euo pipefail
 cd "$(dirname "$0")/.."
 mkdir -p mlflow-data
@@ -16,5 +16,5 @@ else
       --artifacts-destination /mlflow/artifacts --serve-artifacts \
       --allowed-hosts "localhost,localhost:5000,127.0.0.1:5000,mlflow,mlflow:5000" >/dev/null
 fi
-for i in $(seq 1 60); do curl -sf http://localhost:5000/health >/dev/null && break; sleep 1; done
-echo "MLflow listo en http://localhost:5000 ($(curl -s http://localhost:5000/version))"
+for i in $(seq 1 60); do curl -sf http://127.0.0.1:5000/health >/dev/null && break; sleep 1; done
+echo "MLflow listo en http://127.0.0.1:5000 ($(curl -s http://127.0.0.1:5000/version))"

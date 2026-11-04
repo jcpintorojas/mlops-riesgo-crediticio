@@ -54,6 +54,7 @@ paso k8s-04-escalado "4. Escalado: de 3 a 5 réplicas y regreso a 3"
 run kubectl scale deployment/riesgo-api --replicas=5
 run kubectl rollout status deployment/riesgo-api --timeout=240s
 run kubectl get pods -l app=riesgo-api
+run "until [ \$(kubectl get endpointslices -l kubernetes.io/service-name=riesgo-api -o jsonpath='{range .items[*].endpoints[?(@.conditions.ready==true)]}x{end}' | wc -c) -eq 5 ]; do sleep 1; done; sleep 5; kubectl get endpointslices -l kubernetes.io/service-name=riesgo-api"   # +5 s: kube-proxy actualiza iptables
 run "for i in \$(seq 1 50); do pedir | python3 -c 'import sys,json; print(json.load(sys.stdin)[\"pod\"])'; done | sort | uniq -c"
 run kubectl scale deployment/riesgo-api --replicas=3
 run "until [ \$(kubectl get pods -l app=riesgo-api --no-headers | wc -l) -eq 3 ]; do sleep 2; done; kubectl get deployment riesgo-api; kubectl get pods -l app=riesgo-api"
