@@ -1,0 +1,10 @@
+# Servicio de inferencia. Versiones fijadas; las de ML coinciden con el entorno de entrenamiento.
+mlflow-skinny==3.14.0
+scikit-learn==1.9.0
+skops==0.16.0
+numpy==2.5.1
+pandas==2.3.3
+scipy==1.18.0
+fastapi==0.115.6
+uvicorn==0.32.1
+pydantic==2.10.3
