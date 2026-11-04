@@ -1,0 +1,36 @@
+# Integración continua: corre las pruebas que no necesitan clúster, MLflow ni el dataset, y comprueba que las imágenes se construyen.
+name: CI
+on:
+  push:
+  pull_request:
+
+jobs:
+  pruebas:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: api/requirements-dev.txt
+      - name: Instalar dependencias (mismas versiones fijadas que la imagen de la API)
+        run: pip install -r api/requirements-dev.txt
+      - name: Pruebas de la API (modelo falso, sin MLflow)
+        working-directory: api
+        run: python -m pytest -v
+      - name: Pruebas unitarias de drift (datos sintéticos, sin descargar el dataset)
+        env:
+          PYTHONPATH: src:drift
+        run: python -m pytest -v drift/test_unit_drift.py
+      - name: Manifiestos de Kubernetes con YAML válido
+        run: python -c "import glob, yaml; [list(yaml.safe_load_all(open(f))) for f in glob.glob('k8s/*.yaml')]; print('ok')"
+
+  imagenes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Construir imagen de la API
+        run: docker build -t riesgo-api:ci api
+      - name: Construir imagen de experimentación (MLflow + entrenamiento + drift)
+        run: docker build -t riesgo-mlflow:ci docker/mlflow
