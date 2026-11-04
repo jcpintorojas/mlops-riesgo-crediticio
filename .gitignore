@@ -1,0 +1,11 @@
+# Datos (se descargan con src/descargar_datos.py; no se versionan en Git)
+data/*.csv
+# Estado local de MLflow (base SQLite + artefactos): vive en el servidor, no en Git
+mlflow-data/
+mlruns/
+# Python
+__pycache__/
+*.pyc
+.venv/
+# Salidas generadas por las pruebas de drift (se regeneran)
+drift/salidas/
