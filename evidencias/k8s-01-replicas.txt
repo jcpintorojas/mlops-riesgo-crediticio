@@ -1,0 +1,21 @@
+### 1. Tres réplicas en estado Running simultáneamente
+$ kubectl get deployment riesgo-api -o wide
+NAME         READY   UP-TO-DATE   AVAILABLE   AGE   CONTAINERS   IMAGES           SELECTOR
+riesgo-api   3/3     3            3           17m   api          riesgo-api:2.0   app=riesgo-api
+
+$ kubectl get pods -l app=riesgo-api -o wide
+NAME                          READY   STATUS    RESTARTS   AGE    IP            NODE                  NOMINATED NODE   READINESS GATES
+riesgo-api-5bcdcb699b-c8m4z   1/1     Running   0          102s   10.244.0.33   mlops-control-plane   <none>           <none>
+riesgo-api-5bcdcb699b-kpwwh   1/1     Running   0          87s    10.244.0.34   mlops-control-plane   <none>           <none>
+riesgo-api-5bcdcb699b-lbd86   1/1     Running   0          72s    10.244.0.35   mlops-control-plane   <none>           <none>
+
+$ kubectl get service riesgo-api -o wide
+NAME         TYPE       CLUSTER-IP     EXTERNAL-IP   PORT(S)        AGE   SELECTOR
+riesgo-api   NodePort   10.96.36.255   <none>        80:30090/TCP   17m   app=riesgo-api
+
+$ kubectl logs -l app=riesgo-api --prefix --tail=50 | grep 'modelo riesgo-credito'
+[pod/riesgo-api-5bcdcb699b-c8m4z/api] [riesgo-api-5bcdcb699b-c8m4z] modelo riesgo-credito@champion -> versión 2 (run 662559032df74600bfa1deab64b38922)
+[pod/riesgo-api-5bcdcb699b-kpwwh/api] [riesgo-api-5bcdcb699b-kpwwh] modelo riesgo-credito@champion -> versión 2 (run 662559032df74600bfa1deab64b38922)
+[pod/riesgo-api-5bcdcb699b-lbd86/api] [riesgo-api-5bcdcb699b-lbd86] modelo riesgo-credito@champion -> versión 2 (run 662559032df74600bfa1deab64b38922)
+
+# Cada Pod cargó models:/riesgo-credito@champion desde el Model Registry de MLflow al arrancar.

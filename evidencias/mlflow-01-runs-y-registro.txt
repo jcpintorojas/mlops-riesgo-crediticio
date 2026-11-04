@@ -1,0 +1,15 @@
+Experimento 'riesgo-crediticio' (id 1)
+
+run                      run_id                             algoritmo             roc_auc      f1  accuracy
+gb_lr-0.1_depth-3        662559032df74600bfa1deab64b38922   gradient-boosting      0.7787  0.4726    0.8188
+gb_lr-0.05_depth-4       811af73f5b7d43d4a6ae076923b6c779   gradient-boosting      0.7765  0.4678    0.8168
+rf_n-300_depth-10        d7590afa18dd4fbc9ce073d76467bc53   random-forest          0.7749  0.4612    0.8173
+rf_n-100_depth-6         049eeb7cd5754ab5b34af08808792b4a   random-forest          0.7708  0.4556    0.8172
+logreg_C-1.0             bc5c120a34074e23b70c79daed8229c5   regresion-logistica    0.7076  0.3553    0.8077
+logreg_C-0.01            d515a71a0dab4fd685fc921085748c4e   regresion-logistica    0.7067  0.3480    0.8070
+
+Model Registry: riesgo-credito
+  versión 1  run_id bc5c120a34074e23b70c79daed8229c5  alias -  · Modelo base: regresión logística — run logreg_C-1.0 (AUC 0.7076)
+  versión 2  run_id 662559032df74600bfa1deab64b38922  alias ['champion']  · Mejor ROC AUC del experimento — run gb_lr-0.1_depth-3 (AUC 0.7787)
+
+models:/riesgo-credito@champion -> versión 2

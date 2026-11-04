@@ -1,0 +1,20 @@
+### 2. El tráfico se distribuye entre réplicas (nombre del Pod en la respuesta)
+$ pedir | python3 -m json.tool
+{
+    "probabilidad_incumplimiento": 0.7635,
+    "prediccion": "incumple",
+    "modelo": {
+        "nombre": "riesgo-credito",
+        "alias": "champion",
+        "version": "2",
+        "run_id": "662559032df74600bfa1deab64b38922"
+    },
+    "pod": "riesgo-api-5bcdcb699b-c8m4z"
+}
+
+$ for i in $(seq 1 30); do pedir | python3 -c 'import sys,json; print(json.load(sys.stdin)["pod"])'; done | sort | uniq -c
+      9 riesgo-api-5bcdcb699b-c8m4z
+     14 riesgo-api-5bcdcb699b-kpwwh
+      7 riesgo-api-5bcdcb699b-lbd86
+
+# 30 peticiones sucesivas al Service (NodePort 30090) fueron atendidas por los 3 Pods.

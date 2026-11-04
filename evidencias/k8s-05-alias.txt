@@ -1,0 +1,69 @@
+### 5. Trazabilidad: cambiar el alias @champion cambia el modelo servido sin tocar código ni imagen
+$ curl -s http://172.18.0.2:30090/info | python3 -m json.tool
+{
+    "pod": "riesgo-api-5bcdcb699b-ng9bl",
+    "modelo": "riesgo-credito",
+    "alias": "champion",
+    "version": "2",
+    "run_id": "662559032df74600bfa1deab64b38922",
+    "umbral": 0.5
+}
+
+$ bash scripts/entrenar.sh src/alias.py 1 2>/dev/null
+@champion -> versión 1 (run bc5c120a34074e23b70c79daed8229c5)
+
+$ kubectl rollout restart deployment/riesgo-api
+deployment.apps/riesgo-api restarted
+
+$ kubectl rollout status deployment/riesgo-api --timeout=300s
+Waiting for deployment "riesgo-api" rollout to finish: 1 out of 3 new replicas have been updated...
+Waiting for deployment "riesgo-api" rollout to finish: 1 out of 3 new replicas have been updated...
+Waiting for deployment "riesgo-api" rollout to finish: 1 out of 3 new replicas have been updated...
+Waiting for deployment "riesgo-api" rollout to finish: 2 out of 3 new replicas have been updated...
+Waiting for deployment "riesgo-api" rollout to finish: 2 out of 3 new replicas have been updated...
+Waiting for deployment "riesgo-api" rollout to finish: 2 out of 3 new replicas have been updated...
+Waiting for deployment "riesgo-api" rollout to finish: 2 out of 3 new replicas have been updated...
+Waiting for deployment "riesgo-api" rollout to finish: 1 old replicas are pending termination...
+Waiting for deployment "riesgo-api" rollout to finish: 1 old replicas are pending termination...
+Waiting for deployment "riesgo-api" rollout to finish: 1 old replicas are pending termination...
+deployment "riesgo-api" successfully rolled out
+
+$ esperar_viejos
+(Pods de la versión anterior ya terminados)
+
+$ for i in $(seq 1 6); do curl -s http://172.18.0.2:30090/info; echo; done
+{"pod":"riesgo-api-dd4bf8b65-6dlxp","modelo":"riesgo-credito","alias":"champion","version":"1","run_id":"bc5c120a34074e23b70c79daed8229c5","umbral":0.5}
+{"pod":"riesgo-api-dd4bf8b65-p6bsz","modelo":"riesgo-credito","alias":"champion","version":"1","run_id":"bc5c120a34074e23b70c79daed8229c5","umbral":0.5}
+{"pod":"riesgo-api-dd4bf8b65-6dlxp","modelo":"riesgo-credito","alias":"champion","version":"1","run_id":"bc5c120a34074e23b70c79daed8229c5","umbral":0.5}
+{"pod":"riesgo-api-dd4bf8b65-2zfbc","modelo":"riesgo-credito","alias":"champion","version":"1","run_id":"bc5c120a34074e23b70c79daed8229c5","umbral":0.5}
+{"pod":"riesgo-api-dd4bf8b65-p6bsz","modelo":"riesgo-credito","alias":"champion","version":"1","run_id":"bc5c120a34074e23b70c79daed8229c5","umbral":0.5}
+{"pod":"riesgo-api-dd4bf8b65-p6bsz","modelo":"riesgo-credito","alias":"champion","version":"1","run_id":"bc5c120a34074e23b70c79daed8229c5","umbral":0.5}
+
+$ bash scripts/entrenar.sh src/alias.py 2 2>/dev/null
+@champion -> versión 2 (run 662559032df74600bfa1deab64b38922)
+
+$ kubectl rollout restart deployment/riesgo-api
+deployment.apps/riesgo-api restarted
+
+$ kubectl rollout status deployment/riesgo-api --timeout=300s
+Waiting for deployment "riesgo-api" rollout to finish: 1 out of 3 new replicas have been updated...
+Waiting for deployment "riesgo-api" rollout to finish: 1 out of 3 new replicas have been updated...
+Waiting for deployment "riesgo-api" rollout to finish: 1 out of 3 new replicas have been updated...
+Waiting for deployment "riesgo-api" rollout to finish: 2 out of 3 new replicas have been updated...
+Waiting for deployment "riesgo-api" rollout to finish: 2 out of 3 new replicas have been updated...
+Waiting for deployment "riesgo-api" rollout to finish: 2 out of 3 new replicas have been updated...
+Waiting for deployment "riesgo-api" rollout to finish: 2 out of 3 new replicas have been updated...
+Waiting for deployment "riesgo-api" rollout to finish: 1 old replicas are pending termination...
+Waiting for deployment "riesgo-api" rollout to finish: 1 old replicas are pending termination...
+Waiting for deployment "riesgo-api" rollout to finish: 1 old replicas are pending termination...
+deployment "riesgo-api" successfully rolled out
+
+$ esperar_viejos
+(Pods de la versión anterior ya terminados)
+
+$ for i in $(seq 1 3); do curl -s http://172.18.0.2:30090/info; echo; done
+{"pod":"riesgo-api-5c8d69676c-9pgv7","modelo":"riesgo-credito","alias":"champion","version":"2","run_id":"662559032df74600bfa1deab64b38922","umbral":0.5}
+{"pod":"riesgo-api-5c8d69676c-9pgv7","modelo":"riesgo-credito","alias":"champion","version":"2","run_id":"662559032df74600bfa1deab64b38922","umbral":0.5}
+{"pod":"riesgo-api-5c8d69676c-x6p2b","modelo":"riesgo-credito","alias":"champion","version":"2","run_id":"662559032df74600bfa1deab64b38922","umbral":0.5}
+
+# El alias pasó a la versión 1 (rollback del modelo) y volvió a la 2; la imagen riesgo-api:2.0 fue la misma en todo momento.

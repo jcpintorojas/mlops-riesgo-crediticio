@@ -1,0 +1,32 @@
+### 3. Autorreparación: se elimina un Pod y el servicio no deja de responder
+$ kubectl get pods -l app=riesgo-api
+NAME                          READY   STATUS    RESTARTS   AGE
+riesgo-api-5bcdcb699b-c8m4z   1/1     Running   0          105s
+riesgo-api-5bcdcb699b-kpwwh   1/1     Running   0          90s
+riesgo-api-5bcdcb699b-lbd86   1/1     Running   0          75s
+
+$ kubectl delete pod riesgo-api-5bcdcb699b-c8m4z --wait=false
+pod "riesgo-api-5bcdcb699b-c8m4z" deleted from default namespace
+
+$ sleep 3
+
+$ kubectl get pods -l app=riesgo-api
+NAME                          READY   STATUS    RESTARTS   AGE
+riesgo-api-5bcdcb699b-kpwwh   1/1     Running   0          93s
+riesgo-api-5bcdcb699b-lbd86   1/1     Running   0          78s
+riesgo-api-5bcdcb699b-ng9bl   0/1     Running   0          3s
+
+$ kubectl rollout status deployment/riesgo-api --timeout=180s
+Waiting for deployment "riesgo-api" rollout to finish: 2 of 3 updated replicas are available...
+deployment "riesgo-api" successfully rolled out
+
+$ kubectl get pods -l app=riesgo-api
+NAME                          READY   STATUS    RESTARTS   AGE
+riesgo-api-5bcdcb699b-kpwwh   1/1     Running   0          106s
+riesgo-api-5bcdcb699b-lbd86   1/1     Running   0          91s
+riesgo-api-5bcdcb699b-ng9bl   1/1     Running   0          16s
+
+$ echo 'Peticiones enviadas durante 40 s mientras se eliminaba el Pod: 183 respondidas con 200, 0 con error'
+Peticiones enviadas durante 40 s mientras se eliminaba el Pod: 183 respondidas con 200, 0 con error
+
+# Se eliminó riesgo-api-5bcdcb699b-c8m4z; el ReplicaSet creó otro Pod y el Service siguió respondiendo con los otros dos.

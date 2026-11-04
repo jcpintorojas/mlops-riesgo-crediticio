@@ -1,0 +1,62 @@
+The git executable must be specified in one of the following ways:
+    - be included in your $PATH
+    - be set via $GIT_PYTHON_GIT_EXECUTABLE
+    - explicitly set via git.refresh(<full-path-to-git-executable>)
+
+All git commands will error until this is rectified.
+
+This initial message can be silenced or aggravated in the future by setting the
+$GIT_PYTHON_REFRESH environment variable. Use one of the following values:
+    - quiet|q|silence|s|silent|none|n|0: for no message or exception
+    - warn|w|warning|log|l|1: for a warning message (logging level CRITICAL, displayed by default)
+    - error|e|exception|raise|r|2: for a raised exception
+
+Example:
+    export GIT_PYTHON_REFRESH=quiet
+
+The git executable must be specified in one of the following ways:
+    - be included in your $PATH
+    - be set via $GIT_PYTHON_GIT_EXECUTABLE
+    - explicitly set via git.refresh(<full-path-to-git-executable>)
+
+All git commands will error until this is rectified.
+
+This initial message can be silenced or aggravated in the future by setting the
+$GIT_PYTHON_REFRESH environment variable. Use one of the following values:
+    - quiet|q|silence|s|silent|none|n|0: for no message or exception
+    - warn|w|warning|log|l|1: for a warning message (logging level CRITICAL, displayed by default)
+    - error|e|exception|raise|r|2: for a raised exception
+
+Example:
+    export GIT_PYTHON_REFRESH=quiet
+
+The git executable must be specified in one of the following ways:
+    - be included in your $PATH
+    - be set via $GIT_PYTHON_GIT_EXECUTABLE
+    - explicitly set via git.refresh(<full-path-to-git-executable>)
+
+All git commands will error until this is rectified.
+
+This initial message can be silenced or aggravated in the future by setting the
+$GIT_PYTHON_REFRESH environment variable. Use one of the following values:
+    - quiet|q|silence|s|silent|none|n|0: for no message or exception
+    - warn|w|warning|log|l|1: for a warning message (logging level CRITICAL, displayed by default)
+    - error|e|exception|raise|r|2: for a raised exception
+
+Example:
+    export GIT_PYTHON_REFRESH=quiet
+
+lote  1  afectados   0%  AUC 0.8288  ok           seguidos 0  morosos reales 0.236  prob. media 0.235  data drift VERDE
+lote  2  afectados   0%  AUC 0.7788  ok           seguidos 0  morosos reales 0.202  prob. media 0.230  data drift VERDE
+lote  3  afectados   0%  AUC 0.7616  ok           seguidos 0  morosos reales 0.216  prob. media 0.222  data drift VERDE
+lote  4  afectados   0%  AUC 0.7462  ok           seguidos 0  morosos reales 0.234  prob. media 0.217  data drift VERDE
+lote  5  afectados  15%  AUC 0.7360  ok           seguidos 0  morosos reales 0.248  prob. media 0.210  data drift VERDE
+lote  6  afectados  30%  AUC 0.7055  BAJO UMBRAL  seguidos 1  morosos reales 0.260  prob. media 0.213  data drift VERDE
+lote  7  afectados  45%  AUC 0.6674  BAJO UMBRAL  seguidos 2  morosos reales 0.242  prob. media 0.227  data drift VERDE
+lote  8  afectados  60%  AUC 0.7097  BAJO UMBRAL  seguidos 3  morosos reales 0.248  prob. media 0.239  data drift VERDE
+lote  9  afectados  70%  AUC 0.6691  BAJO UMBRAL  seguidos 4  morosos reales 0.270  prob. media 0.207  data drift VERDE
+lote 10  afectados  80%  AUC 0.6548  BAJO UMBRAL  seguidos 5  morosos reales 0.290  prob. media 0.230  data drift VERDE
+lote 11  afectados  85%  AUC 0.6140  BAJO UMBRAL  seguidos 6  morosos reales 0.338  prob. media 0.219  data drift VERDE
+lote 12  afectados  90%  AUC 0.5995  BAJO UMBRAL  seguidos 7  morosos reales 0.328  prob. media 0.222  data drift VERDE
+
+AUC referencia 0.7787 · σ por lote 0.0232 · umbral 0.7323 · ALARMA DE REENTRENAMIENTO en el lote 8

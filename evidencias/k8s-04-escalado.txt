@@ -1,0 +1,40 @@
+### 4. Escalado: de 3 a 5 réplicas y regreso a 3
+$ kubectl scale deployment/riesgo-api --replicas=5
+deployment.apps/riesgo-api scaled
+
+$ kubectl rollout status deployment/riesgo-api --timeout=240s
+Waiting for deployment "riesgo-api" rollout to finish: 3 of 5 updated replicas are available...
+Waiting for deployment "riesgo-api" rollout to finish: 4 of 5 updated replicas are available...
+deployment "riesgo-api" successfully rolled out
+
+$ kubectl get pods -l app=riesgo-api
+NAME                          READY   STATUS    RESTARTS   AGE
+riesgo-api-5bcdcb699b-gh5xs   1/1     Running   0          15s
+riesgo-api-5bcdcb699b-kpwwh   1/1     Running   0          2m22s
+riesgo-api-5bcdcb699b-lbd86   1/1     Running   0          2m7s
+riesgo-api-5bcdcb699b-ng9bl   1/1     Running   0          52s
+riesgo-api-5bcdcb699b-w5xmc   1/1     Running   0          15s
+
+$ until [ $(kubectl get endpointslices -l kubernetes.io/service-name=riesgo-api -o jsonpath='{range .items[*].endpoints[?(@.conditions.ready==true)]}x{end}' | wc -c) -eq 5 ]; do sleep 1; done; sleep 5; kubectl get endpointslices -l kubernetes.io/service-name=riesgo-api
+NAME               ADDRESSTYPE   PORTS   ENDPOINTS                                         AGE
+riesgo-api-dsxr4   IPv4          8000    10.244.0.34,10.244.0.35,10.244.0.38 + 2 more...   18m
+
+$ for i in $(seq 1 50); do pedir | python3 -c 'import sys,json; print(json.load(sys.stdin)["pod"])'; done | sort | uniq -c
+      9 riesgo-api-5bcdcb699b-gh5xs
+      9 riesgo-api-5bcdcb699b-kpwwh
+     11 riesgo-api-5bcdcb699b-lbd86
+     11 riesgo-api-5bcdcb699b-ng9bl
+     10 riesgo-api-5bcdcb699b-w5xmc
+
+$ kubectl scale deployment/riesgo-api --replicas=3
+deployment.apps/riesgo-api scaled
+
+$ until [ $(kubectl get pods -l app=riesgo-api --no-headers | wc -l) -eq 3 ]; do sleep 2; done; kubectl get deployment riesgo-api; kubectl get pods -l app=riesgo-api
+NAME         READY   UP-TO-DATE   AVAILABLE   AGE
+riesgo-api   3/3     3            3           18m
+NAME                          READY   STATUS    RESTARTS   AGE
+riesgo-api-5bcdcb699b-kpwwh   1/1     Running   0          2m32s
+riesgo-api-5bcdcb699b-lbd86   1/1     Running   0          2m17s
+riesgo-api-5bcdcb699b-ng9bl   1/1     Running   0          62s
+
+# Con 5 réplicas el tráfico se reparte entre 5 Pods; al volver a 3 se eliminan los sobrantes.

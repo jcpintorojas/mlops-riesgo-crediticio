@@ -1,0 +1,54 @@
+
+=== Lote 'mismo_origen' (6000 filas) vs baseline de entrenamiento (24000 filas) ===
+ variable       tipo prueba  estadistico  p_valor     umbral estado
+LIMIT_BAL   numérica     KS       0.0097   0.7570 p < 0.0036  VERDE
+      AGE   numérica     KS       0.0215   0.0229 p < 0.0036  VERDE
+BILL_AMT1   numérica     KS       0.0077   0.9360 p < 0.0036  VERDE
+BILL_AMT2   numérica     KS       0.0086   0.8680 p < 0.0036  VERDE
+BILL_AMT3   numérica     KS       0.0080   0.9160 p < 0.0036  VERDE
+BILL_AMT4   numérica     KS       0.0094   0.7890 p < 0.0036  VERDE
+BILL_AMT5   numérica     KS       0.0083   0.8930 p < 0.0036  VERDE
+BILL_AMT6   numérica     KS       0.0120   0.4950 p < 0.0036  VERDE
+ PAY_AMT1   numérica     KS       0.0112   0.5840 p < 0.0036  VERDE
+ PAY_AMT2   numérica     KS       0.0120   0.4950 p < 0.0036  VERDE
+ PAY_AMT3   numérica     KS       0.0104   0.6710 p < 0.0036  VERDE
+ PAY_AMT4   numérica     KS       0.0103   0.6850 p < 0.0036  VERDE
+ PAY_AMT5   numérica     KS       0.0105   0.6560 p < 0.0036  VERDE
+ PAY_AMT6   numérica     KS       0.0109   0.6130 p < 0.0036  VERDE
+      SEX categórica    PSI       0.0001      NaN PSI >= 0.2  VERDE
+EDUCATION categórica    PSI       0.0011      NaN PSI >= 0.2  VERDE
+ MARRIAGE categórica    PSI       0.0006      NaN PSI >= 0.2  VERDE
+    PAY_1 categórica    PSI       0.0029      NaN PSI >= 0.2  VERDE
+    PAY_2 categórica    PSI       0.0009      NaN PSI >= 0.2  VERDE
+    PAY_3 categórica    PSI       0.0003      NaN PSI >= 0.2  VERDE
+    PAY_4 categórica    PSI       0.0013      NaN PSI >= 0.2  VERDE
+    PAY_5 categórica    PSI       0.0016      NaN PSI >= 0.2  VERDE
+    PAY_6 categórica    PSI       0.0023      NaN PSI >= 0.2  VERDE
+ESTADO DEL LOTE: VERDE  · en rojo: []
+
+=== Lote 'derivado' (6000 filas) vs baseline de entrenamiento (24000 filas) ===
+ variable       tipo prueba  estadistico       p_valor     umbral estado
+LIMIT_BAL   numérica     KS       0.2481 8.420000e-261 p < 0.0036   ROJO
+      AGE   numérica     KS       0.2742 2.450022e-319 p < 0.0036   ROJO
+BILL_AMT1   numérica     KS       0.1062  1.450000e-47 p < 0.0036   ROJO
+BILL_AMT2   numérica     KS       0.0086  8.680000e-01 p < 0.0036  VERDE
+BILL_AMT3   numérica     KS       0.0080  9.160000e-01 p < 0.0036  VERDE
+BILL_AMT4   numérica     KS       0.0094  7.890000e-01 p < 0.0036  VERDE
+BILL_AMT5   numérica     KS       0.0083  8.930000e-01 p < 0.0036  VERDE
+BILL_AMT6   numérica     KS       0.0120  4.950000e-01 p < 0.0036  VERDE
+ PAY_AMT1   numérica     KS       0.0112  5.840000e-01 p < 0.0036  VERDE
+ PAY_AMT2   numérica     KS       0.0120  4.950000e-01 p < 0.0036  VERDE
+ PAY_AMT3   numérica     KS       0.0104  6.710000e-01 p < 0.0036  VERDE
+ PAY_AMT4   numérica     KS       0.0103  6.850000e-01 p < 0.0036  VERDE
+ PAY_AMT5   numérica     KS       0.0105  6.560000e-01 p < 0.0036  VERDE
+ PAY_AMT6   numérica     KS       0.0109  6.130000e-01 p < 0.0036  VERDE
+      SEX categórica    PSI       0.0001           NaN PSI >= 0.2  VERDE
+EDUCATION categórica    PSI       0.3234           NaN PSI >= 0.2   ROJO
+ MARRIAGE categórica    PSI       0.0006           NaN PSI >= 0.2  VERDE
+    PAY_1 categórica    PSI       0.3632           NaN PSI >= 0.2   ROJO
+    PAY_2 categórica    PSI       0.0009           NaN PSI >= 0.2  VERDE
+    PAY_3 categórica    PSI       0.0003           NaN PSI >= 0.2  VERDE
+    PAY_4 categórica    PSI       0.0013           NaN PSI >= 0.2  VERDE
+    PAY_5 categórica    PSI       0.0016           NaN PSI >= 0.2  VERDE
+    PAY_6 categórica    PSI       0.0023           NaN PSI >= 0.2  VERDE
+ESTADO DEL LOTE: ROJO  · en rojo: ['LIMIT_BAL', 'AGE', 'BILL_AMT1', 'EDUCATION', 'PAY_1']

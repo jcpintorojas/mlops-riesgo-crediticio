@@ -1,0 +1,11 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.16, pytest-8.3.4, pluggy-1.7.0 -- /usr/local/bin/python
+rootdir: /proyecto
+plugins: anyio-4.16.0
+collecting ... collected 3 items
+
+drift/test_drift.py::test_mismo_origen_pasa_en_verde PASSED              [ 33%]
+drift/test_drift.py::test_lote_derivado_falla_en_rojo PASSED             [ 66%]
+drift/test_drift.py::test_variables_no_tocadas_siguen_estables PASSED    [100%]
+
+============================== 3 passed in 1.08s ===============================
