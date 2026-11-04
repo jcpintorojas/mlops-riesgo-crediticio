@@ -18,7 +18,6 @@ Modelo que predice si un cliente de tarjeta de crédito incumplirá su próximo 
 | [`docs/ARQUITECTURA.md`](docs/ARQUITECTURA.md) | Decisiones, resultados y justificación |
 | [`AGENTS.md`](AGENTS.md) | Guía para agentes de IA |
 | [`docs/PENDIENTES.md`](docs/PENDIENTES.md) | Lo que falta y mejoras posibles |
-| [`docs/GUIA-PROYECTO-PROPIO.md`](docs/GUIA-PROYECTO-PROPIO.md) | Cómo usar este repositorio como plantilla declarada |
 | [`evidencias/`](evidencias/) | Salidas reales y capturas |
 
 ## Requisitos

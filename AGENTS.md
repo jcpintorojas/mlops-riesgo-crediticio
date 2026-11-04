@@ -2,7 +2,7 @@
 
 Lee este archivo primero. Resume qué es el sistema, cómo arrancarlo y qué no romper.
 Detalle: [`docs/OPERACION.md`](docs/OPERACION.md) (arranque y fallas) · [`docs/ARQUITECTURA.md`](docs/ARQUITECTURA.md) (decisiones y resultados).
-Trabajo pendiente: [`docs/PENDIENTES.md`](docs/PENDIENTES.md). Usarlo como plantilla: [`docs/GUIA-PROYECTO-PROPIO.md`](docs/GUIA-PROYECTO-PROPIO.md).
+Trabajo pendiente: [`docs/PENDIENTES.md`](docs/PENDIENTES.md).
 
 ## Qué es
 
