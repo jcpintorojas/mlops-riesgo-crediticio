@@ -12,7 +12,14 @@ Modelo que predice si un cliente de tarjeta de crédito incumplirá su próximo 
 | 4. Drift | Data drift (KS + PSI, pruebas pytest verde/rojo) y concept drift (AUC por lote, criterio de reentrenamiento) | `drift/` |
 | Extra | Interfaz web servida por nginx en el clúster que consume la API | `ui/`, `k8s/ui.yaml` |
 
-Documento de arquitectura: [`docs/ARQUITECTURA.md`](docs/ARQUITECTURA.md) · Evidencias: [`evidencias/`](evidencias/)
+| Documento | Para qué |
+|---|---|
+| [`docs/OPERACION.md`](docs/OPERACION.md) | Arranque, funcionamiento y solución de problemas |
+| [`docs/ARQUITECTURA.md`](docs/ARQUITECTURA.md) | Decisiones, resultados y justificación |
+| [`AGENTS.md`](AGENTS.md) | Guía para agentes de IA |
+| [`docs/PENDIENTES.md`](docs/PENDIENTES.md) | Lo que falta y mejoras posibles |
+| [`docs/GUIA-PROYECTO-PROPIO.md`](docs/GUIA-PROYECTO-PROPIO.md) | Cómo usar este repositorio como plantilla declarada |
+| [`evidencias/`](evidencias/) | Salidas reales y capturas |
 
 ## Requisitos
 Docker, [kind](https://kind.sigs.k8s.io/) y kubectl. Todo lo de Python corre dentro de contenedores (no hace falta instalar nada más).

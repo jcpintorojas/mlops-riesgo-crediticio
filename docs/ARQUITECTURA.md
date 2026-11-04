@@ -139,6 +139,8 @@ En crédito la etiqueta real ("¿pagó?") llega cuando vence la cuota, uno o var
 
 ## 7. Cómo ejecutar
 
+Guía completa de arranque y solución de problemas: [`OPERACION.md`](OPERACION.md). Guía para agentes de IA: [`../AGENTS.md`](../AGENTS.md).
+
 ```bash
 bash scripts/iniciar_mlflow.sh                            # MLflow en http://127.0.0.1:5000
 bash scripts/entrenar.sh src/descargar_datos.py            # datos
@@ -160,6 +162,7 @@ bash scripts/entrenar.sh drift/concept_drift.py            # concept drift + gr�
 ## 9. Limitaciones y siguientes pasos
 
 - El servidor MLflow usa SQLite y disco local; en un equipo real se usaría PostgreSQL y un almacenamiento de objetos (S3/MinIO), como se vio en clase 5.
-- Si MLflow no está disponible al arrancar, los Pods nuevos quedan **vivos pero no listos** (no reciben tráfico); los que ya cargaron el modelo siguen atendiendo.
+- Los Pods que ya cargaron el modelo siguen atendiendo si MLflow se cae (medido: 20 de 20 peticiones con HTTP 200). Pero la carga bloquea el arranque: un Pod nuevo no responde `/health` sin MLflow, la startupProbe lo reinicia a los 2 minutos y entra en `CrashLoopBackOff` hasta que MLflow vuelve. Mejora pendiente: cargar el modelo en segundo plano para que quede vivo pero no listo.
+- El contenedor de MLflow no tiene política de reinicio: tras reiniciar la máquina hay que levantarlo con `scripts/demo.sh`.
 - Un cambio de alias requiere `kubectl rollout restart` para que los Pods recarguen el modelo; se podría automatizar con un pipeline de CD (CD4ML, clase 6).
 - Faltaría un pipeline de CI que corra `pytest`, construya la imagen y la publique en un registro de contenedores.
