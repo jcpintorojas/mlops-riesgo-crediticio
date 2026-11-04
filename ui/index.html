@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Evaluación de riesgo crediticio</title>
+<style>
+  body { font-family: system-ui, sans-serif; background: #f4f6fa; color: #1d2433; margin: 0; }
+  header { background: #1f3864; color: #fff; padding: 14px 24px; }
+  header h1 { margin: 0; font-size: 20px; } header p { margin: 4px 0 0; font-size: 13px; opacity: .8; }
+  main { max-width: 1000px; margin: 20px auto; padding: 0 16px; display: grid; grid-template-columns: 1.2fr 1fr; gap: 20px; }
+  @media (max-width: 760px) { main { grid-template-columns: 1fr; } }
+  .card { background: #fff; border-radius: 10px; padding: 18px; box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+  h2 { font-size: 16px; margin: 0 0 12px; color: #1f3864; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  label { font-size: 12px; color: #555; display: block; }
+  input, select { width: 100%; box-sizing: border-box; padding: 6px; border: 1px solid #c8cfdc; border-radius: 6px; font-size: 14px; }
+  .botones { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+  button { border: 0; border-radius: 6px; padding: 9px 14px; font-size: 14px; cursor: pointer; background: #2e5597; color: #fff; }
+  button.sec { background: #e3e8f2; color: #1f3864; }
+  .barra { height: 22px; background: #e3e8f2; border-radius: 11px; overflow: hidden; margin: 8px 0; }
+  .relleno { height: 100%; width: 0; transition: width .4s; }
+  .grande { font-size: 30px; font-weight: 700; }
+  .ok { color: #38761d; } .mal { color: #b00020; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; } td { padding: 4px 0; border-bottom: 1px solid #eef; }
+  td:first-child { color: #666; } code { font-size: 12px; }
+  #pods div { font-size: 13px; margin: 3px 0; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Evaluación de riesgo crediticio</h1>
+  <p>Interfaz que consume la API desplegada en Kubernetes (Service riesgo-api) · Julio Cesar Pinto Rojas</p>
+</header>
+<main>
+  <section class="card">
+    <h2>Datos del cliente</h2>
+    <div class="botones" style="margin:0 0 12px">
+      <button class="sec" onclick="cargar('bajo')">Ejemplo: riesgo bajo</button>
+      <button class="sec" onclick="cargar('alto')">Ejemplo: riesgo alto</button>
+    </div>
+    <div class="grid" id="form"></div>
+    <div class="botones">
+      <button onclick="evaluar()">Evaluar cliente</button>
+      <button class="sec" onclick="rafaga()">Enviar 20 peticiones (ver balanceo)</button>
+    </div>
+  </section>
+  <section class="card">
+    <h2>Resultado</h2>
+    <div id="resultado">Completa los datos y presiona «Evaluar cliente».</div>
+    <h2 style="margin-top:20px">Pods que atendieron</h2>
+    <div id="pods">—</div>
+  </section>
+</main>
+<script>
+const API = "/api";  // nginx reenvía /api al Service riesgo-api del clúster
+const EJEMPLOS = {
+  bajo: {LIMIT_BAL: 500000, SEX: 2, EDUCATION: 1, MARRIAGE: 1, AGE: 41, PAY_1: -1, PAY_2: -1, PAY_3: -1, PAY_4: -1, PAY_5: -1, PAY_6: -1,
+         BILL_AMT1: 12000, BILL_AMT2: 9500, BILL_AMT3: 11000, BILL_AMT4: 8000, BILL_AMT5: 7600, BILL_AMT6: 9000,
+         PAY_AMT1: 9500, PAY_AMT2: 11000, PAY_AMT3: 8000, PAY_AMT4: 7600, PAY_AMT5: 9000, PAY_AMT6: 10000},
+  alto: {LIMIT_BAL: 30000, SEX: 1, EDUCATION: 3, MARRIAGE: 2, AGE: 26, PAY_1: 2, PAY_2: 2, PAY_3: 2, PAY_4: 2, PAY_5: 2, PAY_6: 2,
+         BILL_AMT1: 29500, BILL_AMT2: 28900, BILL_AMT3: 28100, BILL_AMT4: 27400, BILL_AMT5: 26800, BILL_AMT6: 26000,
+         PAY_AMT1: 0, PAY_AMT2: 0, PAY_AMT3: 1000, PAY_AMT4: 0, PAY_AMT5: 0, PAY_AMT6: 500},
+};
+const ESTADOS = [[-2, "sin consumo"], [-1, "al día"], [0, "pago mínimo"], ...[1,2,3,4,5,6,7,8,9].map(n => [n, `${n} mes(es) de atraso`])];
+const CAMPOS = [
+  ["LIMIT_BAL", "Límite de crédito (NT$)"], ["AGE", "Edad"],
+  ["SEX", "Sexo", [[1, "hombre"], [2, "mujer"]]],
+  ["EDUCATION", "Educación", [[1, "posgrado"], [2, "universidad"], [3, "secundaria"], [4, "otros"]]],
+  ["MARRIAGE", "Estado civil", [[1, "casado/a"], [2, "soltero/a"], [3, "otros"]]],
+  ["PAY_1", "Estado de pago último mes", ESTADOS], ["PAY_2", "Estado de pago hace 2 meses", ESTADOS],
+  ["PAY_3", "Estado de pago hace 3 meses", ESTADOS],
+  ["BILL_AMT1", "Factura último mes"], ["PAY_AMT1", "Pagado último mes"],
+  ["BILL_AMT2", "Factura hace 2 meses"], ["PAY_AMT2", "Pagado hace 2 meses"],
+];
+let base = {...EJEMPLOS.bajo};
+const form = document.getElementById("form");
+for (const [id, txt, opts] of CAMPOS) {
+  const d = document.createElement("div");
+  d.innerHTML = `<label for="${id}">${txt}</label>` + (opts
+    ? `<select id="${id}">${opts.map(([v, t]) => `<option value="${v}">${t}</option>`).join("")}</select>`
+    : `<input id="${id}" type="number">`);
+  form.appendChild(d);
+}
+function cargar(nombre) {
+  base = {...EJEMPLOS[nombre]};
+  for (const [id] of CAMPOS) document.getElementById(id).value = base[id];
+}
+function leer() {
+  const c = {...base};
+  for (const [id] of CAMPOS) c[id] = Number(document.getElementById(id).value);
+  return c;
+}
+async function pedir() {
+  const r = await fetch(`${API}/predict`, {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(leer())});
+  const d = await r.json();
+  if (!r.ok) throw new Error(JSON.stringify(d.detail || d));
+  return d;
+}
+function mostrar(d) {
+  const p = d.probabilidad_incumplimiento, mal = d.prediccion === "incumple";
+  document.getElementById("resultado").innerHTML = `
+    <div class="grande ${mal ? "mal" : "ok"}">${(p * 100).toFixed(1)} %</div>
+    <div>probabilidad de incumplir el próximo pago</div>
+    <div class="barra"><div class="relleno" style="width:${p * 100}%;background:${mal ? "#cc0000" : "#6aa84f"}"></div></div>
+    <p><b class="${mal ? "mal" : "ok"}">${mal ? "Alto riesgo: incumple" : "Bajo riesgo: cumple"}</b> (umbral 50 %)</p>
+    <table>
+      <tr><td>Modelo</td><td><code>${d.modelo.nombre}@${d.modelo.alias}</code></td></tr>
+      <tr><td>Versión del registro</td><td><code>${d.modelo.version}</code></td></tr>
+      <tr><td>Run de MLflow</td><td><code>${d.modelo.run_id}</code></td></tr>
+      <tr><td>Pod que respondió</td><td><code>${d.pod}</code></td></tr>
+    </table>`;
+}
+async function evaluar() {
+  try { const d = await pedir(); mostrar(d); document.getElementById("pods").innerHTML = `<div>1 × <code>${d.pod}</code></div>`; }
+  catch (e) { document.getElementById("resultado").innerHTML = `<span class="mal">Error: ${e.message}</span>`; }
+}
+async function rafaga() {
+  const cuenta = {}; let ultima;
+  for (let i = 0; i < 20; i++) { try { ultima = await pedir(); cuenta[ultima.pod] = (cuenta[ultima.pod] || 0) + 1; } catch (e) {} }
+  if (ultima) mostrar(ultima);
+  document.getElementById("pods").innerHTML = Object.entries(cuenta).sort()
+    .map(([pod, n]) => `<div>${n} × <code>${pod}</code></div>`).join("") || "sin respuestas";
+}
+cargar("bajo");
+</script>
+</body>
+</html>
