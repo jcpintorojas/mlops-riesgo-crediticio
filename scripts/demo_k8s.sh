@@ -5,7 +5,7 @@ set -uo pipefail
 cd "$(dirname "$0")/.."
 export PATH=$HOME/.local/bin:$PATH
 mkdir -p evidencias
-NODO=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' mlops-control-plane)
+source scripts/_nodo.sh   # define NODO (127.0.0.1 si el clúster usa k8s/kind-config.yaml)
 URL="http://$NODO:30090"
 paso() { EVF="evidencias/$1.txt"; : > "$EVF"; echo "### $2" | tee -a "$EVF"; }
 run()  { echo "\$ $*" | tee -a "$EVF"; bash -c "$*" 2>&1 | tee -a "$EVF"; echo | tee -a "$EVF"; }

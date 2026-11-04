@@ -16,7 +16,7 @@ kubectl rollout status deployment/riesgo-api --timeout=300s
 kubectl rollout status deployment/riesgo-ui --timeout=120s
 while kubectl get pods --no-headers | grep -q Terminating; do sleep 2; done   # que no se vean Pods viejos
 kubectl get pods -o wide
-NODO=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' mlops-control-plane)
+source scripts/_nodo.sh   # define NODO (127.0.0.1 si el clúster usa k8s/kind-config.yaml)
 echo
 echo "Listo:"
 echo "  MLflow (experimentos y Model Registry): http://127.0.0.1:5000"
