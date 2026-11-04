@@ -14,6 +14,7 @@ echo "3) Pods de la API y de la interfaz"
 kubectl rollout restart deployment/riesgo-api >/dev/null   # que vuelvan a leer @champion del registro
 kubectl rollout status deployment/riesgo-api --timeout=300s
 kubectl rollout status deployment/riesgo-ui --timeout=120s
+while kubectl get pods --no-headers | grep -q Terminating; do sleep 2; done   # que no se vean Pods viejos
 kubectl get pods -o wide
 NODO=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' mlops-control-plane)
 echo
