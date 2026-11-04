@@ -1,0 +1,4 @@
+# Solo para pruebas locales y CI (no entra en la imagen de la API).
+-r requirements.txt
+pytest==8.3.4
+httpx==0.28.1
