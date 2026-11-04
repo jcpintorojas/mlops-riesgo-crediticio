@@ -1,0 +1,13 @@
+# Service: IP estable que reparte las peticiones entre los Pods con la etiqueta app=riesgo-api.
+apiVersion: v1
+kind: Service
+metadata:
+  name: riesgo-api
+spec:
+  type: NodePort
+  selector:
+    app: riesgo-api
+  ports:
+    - port: 80
+      targetPort: 8000
+      nodePort: 30090
