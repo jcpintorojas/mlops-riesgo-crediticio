@@ -28,11 +28,13 @@
 </style>
 </head>
 <body>
+<!-- Encabezado de la página -->
 <header>
   <h1>Evaluación de riesgo crediticio</h1>
   <p>Interfaz que consume la API desplegada en Kubernetes (Service riesgo-api) · Julio Cesar Pinto Rojas</p>
 </header>
 <main>
+  <!-- Formulario: el JavaScript genera sus campos -->
   <section class="card">
     <h2>Datos del cliente</h2>
     <div class="botones" style="margin:0 0 12px">
@@ -45,6 +47,7 @@
       <button class="sec" onclick="rafaga()">Enviar 20 peticiones (ver balanceo)</button>
     </div>
   </section>
+  <!-- Resultado de la API y reparto entre Pods -->
   <section class="card">
     <h2>Resultado</h2>
     <div id="resultado">Completa los datos y presiona «Evaluar cliente».</div>
@@ -53,7 +56,9 @@
   </section>
 </main>
 <script>
+// Ruta relativa: va a nginx, dentro del clúster, y nginx la reenvía a la API.
 const API = "/api";  // nginx reenvía /api al Service riesgo-api del clúster
+// Dos clientes de ejemplo con las 23 variables que exige la API.
 const EJEMPLOS = {
   bajo: {LIMIT_BAL: 500000, SEX: 2, EDUCATION: 1, MARRIAGE: 1, AGE: 41, PAY_1: -1, PAY_2: -1, PAY_3: -1, PAY_4: -1, PAY_5: -1, PAY_6: -1,
          BILL_AMT1: 12000, BILL_AMT2: 9500, BILL_AMT3: 11000, BILL_AMT4: 8000, BILL_AMT5: 7600, BILL_AMT6: 9000,
@@ -62,7 +67,9 @@ const EJEMPLOS = {
          BILL_AMT1: 29500, BILL_AMT2: 28900, BILL_AMT3: 28100, BILL_AMT4: 27400, BILL_AMT5: 26800, BILL_AMT6: 26000,
          PAY_AMT1: 0, PAY_AMT2: 0, PAY_AMT3: 1000, PAY_AMT4: 0, PAY_AMT5: 0, PAY_AMT6: 500},
 };
+// Opciones de estado de pago: los mismos valores que valida la API.
 const ESTADOS = [[-2, "sin consumo"], [-1, "al día"], [0, "pago mínimo"], ...[1,2,3,4,5,6,7,8,9].map(n => [n, `${n} mes(es) de atraso`])];
+// Campos visibles. Las demás variables se toman del ejemplo cargado.
 const CAMPOS = [
   ["LIMIT_BAL", "Límite de crédito (NT$)"], ["AGE", "Edad"],
   ["SEX", "Sexo", [[1, "hombre"], [2, "mujer"]]],
@@ -73,8 +80,10 @@ const CAMPOS = [
   ["BILL_AMT1", "Factura último mes"], ["PAY_AMT1", "Pagado último mes"],
   ["BILL_AMT2", "Factura hace 2 meses"], ["PAY_AMT2", "Pagado hace 2 meses"],
 ];
+// Cliente base: aporta las variables que no aparecen en el formulario.
 let base = {...EJEMPLOS.bajo};
 const form = document.getElementById("form");
+// Crea cada campo: una lista si tiene opciones; si no, un número.
 for (const [id, txt, opts] of CAMPOS) {
   const d = document.createElement("div");
   d.innerHTML = `<label for="${id}">${txt}</label>` + (opts
@@ -82,21 +91,25 @@ for (const [id, txt, opts] of CAMPOS) {
     : `<input id="${id}" type="number">`);
   form.appendChild(d);
 }
+// Llena el formulario con un ejemplo.
 function cargar(nombre) {
   base = {...EJEMPLOS[nombre]};
   for (const [id] of CAMPOS) document.getElementById(id).value = base[id];
 }
+// Combina el cliente base con lo escrito en el formulario.
 function leer() {
   const c = {...base};
   for (const [id] of CAMPOS) c[id] = Number(document.getElementById(id).value);
   return c;
 }
+// Llama a la API desplegada en Kubernetes y devuelve su respuesta.
 async function pedir() {
   const r = await fetch(`${API}/predict`, {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(leer())});
   const d = await r.json();
   if (!r.ok) throw new Error(JSON.stringify(d.detail || d));
   return d;
 }
+// Muestra probabilidad, versión del modelo, run y Pod.
 function mostrar(d) {
   const p = d.probabilidad_incumplimiento, mal = d.prediccion === "incumple";
   document.getElementById("resultado").innerHTML = `
@@ -111,10 +124,12 @@ function mostrar(d) {
       <tr><td>Pod que respondió</td><td><code>${d.pod}</code></td></tr>
     </table>`;
 }
+// Botón Evaluar cliente: una petición.
 async function evaluar() {
   try { const d = await pedir(); mostrar(d); document.getElementById("pods").innerHTML = `<div>1 × <code>${d.pod}</code></div>`; }
   catch (e) { document.getElementById("resultado").innerHTML = `<span class="mal">Error: ${e.message}</span>`; }
 }
+// Botón de 20 peticiones: cuenta cuántas atendió cada Pod.
 async function rafaga() {
   const cuenta = {}; let ultima;
   for (let i = 0; i < 20; i++) { try { ultima = await pedir(); cuenta[ultima.pod] = (cuenta[ultima.pod] || 0) + 1; } catch (e) {} }

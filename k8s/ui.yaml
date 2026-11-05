@@ -1,12 +1,15 @@
 # Interfaz web (puntos extra): nginx sin privilegios que sirve la página y consume la API del clúster.
 # El ConfigMap "riesgo-ui" se crea desde ui/index.html y ui/default.conf (ver scripts/desplegar.sh).
 apiVersion: apps/v1
+# Deployment de la interfaz web.
 kind: Deployment
 metadata:
+  # Nombre del recurso.
   name: riesgo-ui
   labels:
     app: riesgo-ui
 spec:
+  # Una sola réplica: basta para la interfaz de esta práctica.
   replicas: 1
   selector:
     matchLabels:
@@ -18,28 +21,36 @@ spec:
     spec:
       containers:
         - name: nginx
+          # nginx que no corre como administrador; por eso escucha en 8080.
           image: nginxinc/nginx-unprivileged:1.27-alpine
           ports:
             - containerPort: 8080
+          # Coloca los archivos del ConfigMap dentro del contenedor.
           volumeMounts:
             - name: archivos
+              # La página web.
               mountPath: /usr/share/nginx/html/index.html
               subPath: index.html
             - name: archivos
+              # La configuración de nginx.
               mountPath: /etc/nginx/conf.d/default.conf
               subPath: default.conf
+          # requests = limits: QoS Guaranteed.
           resources:
             requests: { cpu: 50m, memory: 32Mi }
             limits: { cpu: 50m, memory: 32Mi }
+          # Solo recibe tráfico cuando nginx responde.
           readinessProbe:
             httpGet: { path: /, port: 8080 }
             periodSeconds: 5
+      # El volumen viene del ConfigMap riesgo-ui.
       volumes:
         - name: archivos
           configMap:
             name: riesgo-ui
 ---
 apiVersion: v1
+# Service para entrar a la interfaz desde el navegador.
 kind: Service
 metadata:
   name: riesgo-ui
@@ -50,4 +61,5 @@ spec:
   ports:
     - port: 80
       targetPort: 8080
+      # Puerto de la web desde fuera del clúster.
       nodePort: 30091
